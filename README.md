@@ -1,15 +1,57 @@
-# python_win_docker_builds
-Builds Windows images with Python installed
+# Python Image based on Windows Nano Server
 
-Had an idea about what I might want this to be...
+This project allows you to build an image that provides Python based on _Windows Nano
+Server_.  [Python provides images](https://hub.docker.com/_/python?tab=tags&page=1&name=windows)
+based on _Windows Server Core_. The difference between them is that Nano Server is a much more
+stripped down container image.
 
-Basically I want a way to script building docker images for Python
+```bash
+REPOSITORY   TAG                       IMAGE ID       CREATED          SIZE
+python       3.9.9-windowsservercore   b2a3ac00cbf7   2 weeks ago      5.86GB
+pythonnano   latest                    070389bb067f   46 minutes ago   309MB
+```
 
-So build-py 2.7 would grab the latest 2.7 release and make an image for it
+## Building an Image
 
-build-py 3.9 would do the same for the 3.9 release
+```bash
+# For the latest release
+docker build -t pythonnano .
 
- Select-String -InputObject "3.7" -Pattern "^([0-9]+)(\.[0-9]+)?(\.[0-9]+)?$"
+# If you want the latest 3.7 release
+docker build --build-arg PYTHON_VERSION=3.7.99 -t pythonnano .
 
-(Select-String -InputObject "3.7.1" -Pattern "^([0-9]+)(?:\.([0-9]+))?(?:\.([0-9]+))?$").Matches[0].Groups[1..3].Value
+# Check out your hard work!
+docker run -it --rm pythonnano
+```
+
+# Limitations
+
+Because _Windows Nano Server_ is heavily stripped down, it is possible that
+Python packages will fail to install or work properly. As I evaluate it further
+I will update this section.
+
+## PyInstaller
+
+The 'BeginUpdateResource' in the Win32 API is missing from Nano Server.
+PyInstaller uses this API to update metadata in the PE such as the icon for the
+executable. Since Windows Server Core provides this API, I would recommend using
+it instead.
+
+That said ... there are some ways around this issue.
+
+For releases later >= 4.2, PyInstaller appears to always use that API for
+--onefile (just an .exe) builds. If you don't need a single executable, run
+--PyInstaller and specify to not assign an executable icon.
+
+```
+pyinstaller -i=NONE --console .\your_app.py
+```
+
+I found that PyInstaller < 4.2 will work by default. The bootloader in those
+releases contains a default icon already in the executable, so it won't attempt
+to update the icon resource. It will also work to build a single executable.
+
+https://github.com/dotnet/runtime/blob/57bfe474518ab5b7cfe6bf7424a79ce3af9d6657/src/installer/managed/Microsoft.NET.HostModel/ResourceUpdater.cs#L196-L198
+
+https://github.com/hdf/pyinstaller/commit/8e16a3ae45050e9f318923babbb06874cf3345ee#diff
 
