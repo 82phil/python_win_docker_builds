@@ -6,9 +6,9 @@ based on _Windows Server Core_. The difference between them is that Nano Server 
 stripped down container image.
 
 ```bash
-REPOSITORY   TAG                       IMAGE ID       CREATED          SIZE
-python       3.9.9-windowsservercore   b2a3ac00cbf7   2 weeks ago      5.86GB
-pythonnano   latest                    070389bb067f   46 minutes ago   309MB
+REPOSITORY   TAG                          IMAGE ID       CREATED          SIZE
+python       3.9.9-windowsservercore      b2a3ac00cbf7   2 weeks ago      5.86GB
+python       3.9-windowsnanoserver-1809   c0f263c70cf3   11 seconds ago   304MB
 ```
 
 ## Building an Image
@@ -17,12 +17,15 @@ pythonnano   latest                    070389bb067f   46 minutes ago   309MB
 # For the latest release
 docker build -t pythonnano .
 
-# If you want the latest 3.7 release
-docker build --build-arg PYTHON_VERSION=3.7.99 -t pythonnano .
+# If you want the latest 3.9 release
+docker build --build-arg PYTHON_VERSION=3.9.99 -t python:3.9-windowsnanoserver-1809 .
 
 # Check out your hard work!
-docker run -it --rm pythonnano
+docker run -it --rm python:3.9-windowsnanoserver-1809
 ```
+
+In addition there are arguments to specify the OS version to use for the build
+and final image. This can be useful for [process isolation](https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyperv-container#isolation-examples).
 
 # Limitations
 
